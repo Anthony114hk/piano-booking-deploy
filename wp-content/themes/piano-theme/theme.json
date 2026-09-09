@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 2,
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "1140px", "wideSize": "1280px" },
+    "typography": {
+      "fontFamilies": [
+        { "slug": "system", "name": "System", "fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }
+      ]
+    }
+  },
+  "styles": {
+    "spacing": {
+      "padding": { "left": "1rem", "right": "1rem" }
+    }
+  }
+}

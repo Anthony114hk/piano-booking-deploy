@@ -1,0 +1,15 @@
+{
+  "name": "piano-booking/plugin",
+  "description": "Piano Studio Booking custom plugin",
+  "type": "wordpress-plugin",
+  "require": {
+    "php": "^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "PianoBooking\\": "includes/",
+      "PianoBooking\\Admin\\": "admin/",
+      "PianoBooking\\Frontend\\": "public/"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+services:
+  wordpress:
+    build:
+      context: .
+      platforms:
+        - linux/arm64
+    image: ghcr.io/CHANGE_ME/piano-booking:latest
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER:-pbuser}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?set WORDPRESS_DB_PASSWORD in .env}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME:-pianobooking}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', '${WP_HOME:-http://localhost}');
+        define('WP_SITEURL', '${WP_HOME:-http://localhost}');
+        define('DISALLOW_FILE_EDIT', true);
+      # Increase upload limit (default 2M is too small for site logo etc.)
+      WORDPRESS_UPLOAD_MAX_FILESIZE: 64M
+      WORDPRESS_POST_MAX_SIZE: 64M
+      WORDPRESS_MEMORY_LIMIT: 256M
+    volumes:
+      - wp_data:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11
+    restart: always
+    environment:
+      MARIADB_DATABASE: ${WORDPRESS_DB_NAME:-pianobooking}
+      MARIADB_USER: ${WORDPRESS_DB_USER:-pbuser}
+      MARIADB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?set WORDPRESS_DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?set MARIADB_ROOT_PASSWORD in .env}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  wp_data:
+  db_data:

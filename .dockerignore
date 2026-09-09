@@ -1,0 +1,9 @@
+.git
+.github
+*.md
+.env
+.env.*
+docker-compose.yml
+Dockerfile
+oracle-quickstart.sh
+migrate-from-dev.sh

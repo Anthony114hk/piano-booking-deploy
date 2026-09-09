@@ -1,0 +1,67 @@
+/* Piano Booking — admin styles
+   ============================================ */
+
+/* ============================================
+   Dashboard
+   ============================================ */
+.pb-dashboard{padding:20px 0}
+.pb-dashboard h1{margin:0 0 24px 0;font-size:1.8rem;font-weight:600}
+
+/* KPI row */
+.pb-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.pb-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:20px;display:flex;gap:16px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:box-shadow .15s,transform .15s}
+.pb-kpi:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);transform:translateY(-1px)}
+.pb-kpi-icon{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.pb-kpi-icon.pb-kpi-pending{background:#fef3c7;color:#92400e}
+.pb-kpi-icon.pb-kpi-received{background:#d1fae5;color:#065f46}
+.pb-kpi-icon.pb-kpi-hours{background:#dbeafe;color:#1e40af}
+.pb-kpi-icon.pb-kpi-expiring{background:#fce7f3;color:#9d174d}
+.pb-kpi-body{display:flex;flex-direction:column;min-width:0}
+.pb-kpi-label{font-size:.85rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin:0}
+.pb-kpi-value{font-size:1.75rem;font-weight:700;color:#111827;line-height:1.2;margin:4px 0 0 0}
+.pb-kpi-value .unit{font-size:.9rem;font-weight:500;color:#6b7280;margin-left:4px}
+.pb-kpi-sub{font-size:.75rem;color:#9ca3af;margin-top:2px}
+
+/* Calendar */
+.pb-calendar{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.pb-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pb-cal-header h2{margin:0;font-size:1.25rem;font-weight:600}
+.pb-cal-nav{display:flex;gap:8px;align-items:center}
+.pb-cal-nav .button{padding:4px 12px;font-size:.85rem}
+.pb-cal-nav .month-label{min-width:140px;text-align:center;font-weight:600;font-size:1rem}
+
+.pb-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.pb-cal-dow{font-size:.75rem;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:center;padding:8px 0;letter-spacing:.05em}
+.pb-cal-day{background:#f9fafb;border:1px solid #f3f4f6;border-radius:6px;min-height:80px;padding:8px;display:flex;flex-direction:column;gap:4px;position:relative;transition:background .15s,border-color .15s}
+.pb-cal-day:hover{background:#f3f4f6;border-color:#d1d5db;cursor:pointer}
+.pb-cal-day.pb-empty{background:transparent;border-color:transparent}
+.pb-cal-day.pb-today{border-color:#2b6cb0;background:#ebf8ff}
+.pb-cal-day.pb-today .pb-cal-date{background:#2b6cb0;color:#fff}
+.pb-cal-day.pb-past{opacity:.55}
+.pb-cal-date{font-size:.85rem;font-weight:600;color:#374151;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.pb-cal-count{position:absolute;top:6px;right:6px;background:#2b6cb0;color:#fff;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;line-height:1.4}
+.pb-cal-count.pb-zero{display:none}
+.pb-cal-dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:auto}
+.pb-cal-d-dot{width:8px;height:8px;border-radius:50%}
+.pb-cal-d-dot.pb-pending{background:#f59e0b}
+.pb-cal-d-dot.pb-paid{background:#10b981}
+.pb-cal-d-dot.pb-completed{background:#9ca3af}
+.pb-cal-d-dot.pb-cancelled{background:#ef4444}
+
+/* Click hint */
+.pb-cal-legend{display:flex;gap:16px;margin-top:12px;font-size:.8rem;color:#6b7280;justify-content:center;flex-wrap:wrap}
+.pb-cal-legend-item{display:flex;align-items:center;gap:6px}
+.pb-cal-legend-item .pb-cal-d-dot{width:10px;height:10px}
+
+/* Responsive */
+@media (max-width:960px){
+  .pb-kpi-row{grid-template-columns:repeat(2,1fr)}
+  .pb-cal-day{min-height:60px;padding:4px}
+  .pb-cal-date{font-size:.75rem}
+  .pb-cal-count{font-size:.6rem;padding:0 4px}
+}
+@media (max-width:600px){
+  .pb-kpi-row{grid-template-columns:1fr}
+  .pb-kpi{padding:14px}
+  .pb-kpi-value{font-size:1.4rem}
+}
