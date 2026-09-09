@@ -40,28 +40,35 @@ jobs:
           fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Build and push
-        id: build
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          provenance: false
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/piano-booking:${{ steps.version.outputs.version }}
-            ghcr.io/${{ github.repository_owner }}/piano-booking:sha-${{ github.sha }}
-          # No cache config — first build has no cache, and GHA cache backend
-          # can error on cold start. The image is small enough (~250MB) that
-          # rebuilds are fast without caching.
+      - name: Build and push (inline, full log capture)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -x
+          mkdir -p /tmp/buildx-logs
+          docker buildx create \
+            --name pb-builder \
+            --driver docker-container \
+            --bootstrap \
+            --use 2>&1 | tee /tmp/buildx-logs/01-builder.log
 
-      - name: Upload build logs on failure
-        if: failure() && steps.build.conclusion == 'failure'
+          docker buildx inspect --bootstrap 2>&1 | tee /tmp/buildx-logs/02-inspect.log
+
+          docker buildx build \
+            --platform linux/arm64 \
+            --provenance=false \
+            --tag "ghcr.io/${{ github.repository_owner }}/piano-booking:${VERSION}" \
+            --tag "ghcr.io/${{ github.repository_owner }}/piano-booking:sha-${{ github.sha }}" \
+            --push \
+            . 2>&1 | tee /tmp/buildx-logs/03-build.log
+          EXIT=$?
+          echo "exit=$EXIT"
+          exit $EXIT
+
+      - name: Upload build logs (always)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-failure-logs
-          path: |
-            /tmp/*.log
-            /tmp/*.txt
-            ${{ github.workspace }}/buildx-output/
-          if-no-files-found: ignore
+          name: build-logs-${{ github.run_id }}
+          path: /tmp/buildx-logs/
+          if-no-files-found: warn
