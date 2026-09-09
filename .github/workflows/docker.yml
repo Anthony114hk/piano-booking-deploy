@@ -49,5 +49,6 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/piano-booking:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/piano-booking:sha-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # No cache config — first build has no cache, and GHA cache backend
+          # can error on cold start. The image is small enough (~250MB) that
+          # rebuilds are fast without caching.
