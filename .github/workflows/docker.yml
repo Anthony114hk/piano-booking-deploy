@@ -41,14 +41,27 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
+          provenance: false
           tags: |
             ghcr.io/${{ github.repository_owner }}/piano-booking:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/piano-booking:sha-${{ github.sha }}
           # No cache config — first build has no cache, and GHA cache backend
           # can error on cold start. The image is small enough (~250MB) that
           # rebuilds are fast without caching.
+
+      - name: Upload build logs on failure
+        if: failure() && steps.build.conclusion == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-logs
+          path: |
+            /tmp/*.log
+            /tmp/*.txt
+            ${{ github.workspace }}/buildx-output/
+          if-no-files-found: ignore
