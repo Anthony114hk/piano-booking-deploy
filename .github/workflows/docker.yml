@@ -67,12 +67,22 @@ jobs:
             --provenance=false \
             --no-cache \
             --build-arg "CACHE_BUST=${{ github.sha }}" \
-            --tag "ghcr.io/${OWNER}/piano-booking:${VERSION}" \
             --tag "ghcr.io/${OWNER}/piano-booking:sha-${{ github.sha }}" \
             --push \
             . 2>&1 | tee /tmp/buildx-logs/03-build.log
           BUILD_EXIT=$?
           echo "exit=$BUILD_EXIT"
+
+          # If VERSION is "latest", explicitly update the latest tag too.
+          # buildx with multiple --tag sometimes only pushes the last one
+          # when --provenance=false; this ensures both tags point to the new image.
+          if [[ "${VERSION}" == "latest" ]]; then
+            echo "Updating latest tag to point at new sha-${SHA_SHORT} image..."
+            docker buildx imagetools create \
+              -t "ghcr.io/${OWNER}/piano-booking:latest" \
+              "ghcr.io/${OWNER}/piano-booking:sha-${{ github.sha }}" \
+              2>&1 | tee /tmp/buildx-logs/05-imagetools.log
+          fi
 
           # Remove this run's builder so we don't leak docker-container instances.
           docker buildx rm "${BUILDER}" 2>&1 | tee /tmp/buildx-logs/04-cleanup.log || true
