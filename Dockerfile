@@ -1,12 +1,12 @@
 # Piano Booking WordPress image
 # Base: official WordPress image (Apache + PHP 8.3), ARM64 supported
-# CACHE_BUST is passed by CI to force COPY layers to re-run when source
-# files change. Without this, GHA's persistent /var/lib/docker can serve
-# stale layers even with buildx --no-cache.
+FROM wordpress:7-php8.3-apache
+
+# CACHE_BUST is passed by CI (or local build) to force COPY layers to
+# re-run when source files change. Without this, GHA's persistent
+# /var/lib/docker can serve stale layers even with buildx --no-cache.
 ARG CACHE_BUST=unknown
 LABEL org.opencontainers.image.revision=$CACHE_BUST
-
-FROM wordpress:7-php8.3-apache
 
 # Install WP-CLI for management (migrations, search-replace, etc.)
 RUN curl -fsSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
