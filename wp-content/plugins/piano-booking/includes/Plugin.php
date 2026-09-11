@@ -49,7 +49,7 @@ class Plugin
         add_action('wp_ajax_pb_create_booking',           [REST::class, 'create_booking']);
         add_action('wp_ajax_nopriv_pb_create_booking',     [REST::class, 'create_booking']);
         add_action('wp_ajax_pb_upload_proof',             [REST::class, 'upload_proof']);
-        add_action('wp_ajax_nopriv_pb_upload_proof',       [REST::class, 'upload_proof']);
+        // No wp_ajax_nopriv_ for upload_proof — login required (enforced in REST::upload_proof).
         add_action('wp_ajax_pb_create_package_purchase',  [REST::class, 'create_package_purchase']);
         add_action('wp_ajax_nopriv_pb_create_package_purchase', [REST::class, 'create_package_purchase']);
         add_action('wp_ajax_pb_register_and_login',          [REST::class, 'register_and_login']);

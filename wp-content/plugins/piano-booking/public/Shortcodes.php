@@ -77,6 +77,19 @@ class Shortcodes
 
     public static function payment_proof(array $atts): string
     {
+        $bookingId = (int) ($atts['booking_id'] ?? $_GET['booking_id'] ?? 0);
+        $booking   = get_post($bookingId);
+
+        // Access control: must be logged in AND own the booking.
+        // The backend REST handler enforces this too, but hiding the form
+        // here avoids leaking booking IDs to logged-out visitors.
+        if (!is_user_logged_in()) {
+            return '<p>請先登入。</p>';
+        }
+        if (!$booking || (int) $booking->post_author !== get_current_user_id()) {
+            return '<p>無效的預約編號,或你並非此預約嘅預訂人。</p>';
+        }
+
         ob_start();
         include PB_PLUGIN_DIR . 'public/views/proof-upload.php';
         return ob_get_clean();
