@@ -53,6 +53,8 @@ class Availability
     {
         $keys = [];
         for ($h = self::OPEN_H; $h < self::CLOSE_H; $h++) {
+            // 30-minute slots. Minimum booking duration is enforced
+            // server-side in Booking_Service::create_pending() (>= 1 hour).
             foreach (['00', '30'] as $m) {
                 $keys[sprintf('%02d:%s', $h, $m)] = true;
             }

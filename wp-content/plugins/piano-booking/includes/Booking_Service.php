@@ -6,6 +6,13 @@ if (!defined('ABSPATH')) exit;
 class Booking_Service
 {
     /**
+     * Minimum booking duration in hours. Server-side enforced.
+     * Slot granularity is 30 min (see Availability::generate_slot_keys),
+     * so valid durations are: 1.0, 1.5, 2.0, 2.5, …
+     */
+    public const MIN_DURATION_HOURS = 1.0;
+
+    /**
      * Create a pending booking. Returns booking ID on success, WP_Error on failure.
      *
      * Atomicity: acquires slot lock before wp_insert_post; releases on failure.
@@ -22,11 +29,20 @@ class Booking_Service
             }
         }
 
+        // Enforce minimum booking duration
+        $hours = self::diff_hours($data['start_at'], $data['end_at']);
+        if ($hours < self::MIN_DURATION_HOURS) {
+            return new \WP_Error(
+                'pb_too_short',
+                sprintf('Minimum booking is %g hour(s). Please select at least %g hour(s).',
+                    self::MIN_DURATION_HOURS, self::MIN_DURATION_HOURS)
+            );
+        }
+
         if (!Slot_Lock::acquire((int) $data['room_id'], $data['start_at'], $data['end_at'])) {
             return new \WP_Error('pb_slot_taken', 'Slot is currently held by another user. Please try again.');
         }
 
-        $hours = self::diff_hours($data['start_at'], $data['end_at']);
         $rate  = (float) get_post_meta($data['room_id'], 'hourly_rate', true);
         $amount = number_format($hours * $rate, 2, '.', '');
 
