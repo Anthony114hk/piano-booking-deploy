@@ -56,9 +56,13 @@ jobs:
 
           OWNER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
           echo "Pushing as: ghcr.io/${OWNER}/piano-booking"
+          # --no-cache forces a real rebuild (GHA runners persist /var/lib/docker
+          # across runs, which can cause buildx to reuse stale COPY layers
+          # even when the build context content has changed).
           docker buildx build \
             --platform linux/arm64 \
             --provenance=false \
+            --no-cache \
             --tag "ghcr.io/${OWNER}/piano-booking:${VERSION}" \
             --tag "ghcr.io/${OWNER}/piano-booking:sha-${{ github.sha }}" \
             --push \
