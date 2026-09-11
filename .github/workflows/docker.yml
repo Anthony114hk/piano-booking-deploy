@@ -47,17 +47,11 @@ jobs:
           set -x
           mkdir -p /tmp/buildx-logs
 
-          # Each GHA run gets a unique builder name so we don't reuse the
-          # docker-container driver's persistent buildkit cache from a prior
-          # run. --no-cache alone is not enough — the builder container itself
-          # caches layers in its own volume.
-          BUILDER="pb-builder-${{ github.run_id }}"
-          docker buildx create \
-            --name "${BUILDER}" \
-            --driver docker-container \
-            --bootstrap \
-            --use 2>&1 | tee /tmp/buildx-logs/01-builder.log
-
+          # Use the default 'docker' driver (host daemon) instead of 'docker-container'.
+          # The docker-container driver maintains a persistent buildkit cache volume
+          # across GHA runner invocations even when --no-cache is set, leading to
+          # silent stale-push failures. Host driver has no such cache.
+          docker buildx use default 2>&1 | tee /tmp/buildx-logs/00-driver.log || true
           docker buildx inspect --bootstrap 2>&1 | tee /tmp/buildx-logs/02-inspect.log
 
           OWNER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
@@ -68,24 +62,22 @@ jobs:
             --no-cache \
             --build-arg "CACHE_BUST=${{ github.sha }}" \
             --tag "ghcr.io/${OWNER}/piano-booking:sha-${{ github.sha }}" \
+            --tag "ghcr.io/${OWNER}/piano-booking:${VERSION}" \
             --push \
             . 2>&1 | tee /tmp/buildx-logs/03-build.log
           BUILD_EXIT=$?
           echo "exit=$BUILD_EXIT"
 
-          # If VERSION is "latest", explicitly update the latest tag too.
-          # buildx with multiple --tag sometimes only pushes the last one
-          # when --provenance=false; this ensures both tags point to the new image.
-          if [[ "${VERSION}" == "latest" ]]; then
-            echo "Updating latest tag to point at new sha-${SHA_SHORT} image..."
+          # If VERSION is 'latest' and build succeeded, ensure 'latest' tag is updated.
+          # Some buildx versions with --provenance=false + multi-tag only push the
+          # last --tag, leaving 'latest' pointing at the previous image.
+          if [[ "${VERSION}" == "latest" && "${BUILD_EXIT}" -eq 0 ]]; then
+            echo "Tagging just-pushed image as 'latest'..."
             docker buildx imagetools create \
               -t "ghcr.io/${OWNER}/piano-booking:latest" \
               "ghcr.io/${OWNER}/piano-booking:sha-${{ github.sha }}" \
-              2>&1 | tee /tmp/buildx-logs/05-imagetools.log
+              2>&1 | tee /tmp/buildx-logs/05-imagetools.log || true
           fi
-
-          # Remove this run's builder so we don't leak docker-container instances.
-          docker buildx rm "${BUILDER}" 2>&1 | tee /tmp/buildx-logs/04-cleanup.log || true
 
           exit $BUILD_EXIT
 
